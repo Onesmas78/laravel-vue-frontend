@@ -9,6 +9,65 @@ require("admin-lte");
 
 window.Vue = require("vue");
 
+import { Form, HasError, AlertError } from "vform";
+import moment from "moment";
+import VueProgressBar from "vue-progressbar";
+import VueRouter from "vue-router";
+import swal from "sweetalert2";
+
+window.Form = Form;
+window.Swal = swal;
+Vue.component(HasError.name, HasError);
+Vue.component(AlertError.name, AlertError);
+
+Vue.use(VueRouter);
+
+const routes = [
+    {
+        path: "/dash",
+        component: require("./components/dash.vue").default
+    },
+    {
+        path: "/profile",
+        component: require("./components/profile.vue").default
+    },
+    {
+        path: "/users",
+        component: require("./components/users.vue").default
+    },
+    {
+        path: "/system",
+        component: require("./components/system.vue").default
+    }
+];
+
+Vue.filter("upper", function(text) {
+    return text.charAt(0).toUpperCase() + text.slice(1);
+});
+
+Vue.filter("datey", function(createdat) {
+    return moment(createdat).format("MMMM Do YYYY");
+});
+
+const router = new VueRouter({
+    mode: "history",
+    routes
+});
+
+const Toast = Swal.mixin({
+    toast: true,
+    position: "top-end",
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    onOpen: toast => {
+        toast.addEventListener("mouseenter", Swal.stopTimer);
+        toast.addEventListener("mouseleave", Swal.resumeTimer);
+    }
+});
+window.Toast = Toast;
+
+window.events =new Vue();
 /**
  * The following block of code may be used to automatically register your
  * Vue components. It will recursively scan this directory for the Vue
@@ -24,7 +83,26 @@ Vue.component(
     "example-component",
     require("./components/ExampleComponent.vue").default
 );
+Vue.component(
+    'passport-clients',
+    require('./components/passport/Clients.vue').default
+);
 
+Vue.component(
+    'passport-authorized-clients',
+    require('./components/passport/AuthorizedClients.vue').default
+);
+
+Vue.component(
+    'passport-personal-access-tokens',
+    require('./components/passport/PersonalAccessTokens.vue').default
+);
+
+Vue.use(VueProgressBar, {
+    color: "rgb(149, 97, 226)",
+    failedcolor: "red",
+    height: "5px"
+});
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
@@ -32,5 +110,6 @@ Vue.component(
  */
 
 const app = new Vue({
-    el: "#app"
+    el: "#app",
+    router
 });
