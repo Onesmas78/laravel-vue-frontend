@@ -26,7 +26,8 @@ class UsersController extends Controller
     public function index()
     {
         //
-        return User::latest()->paginate(10);
+        $this->authorize('isAdmin');
+        return User::latest()->paginate(5);
     }
 
     /**
@@ -38,6 +39,7 @@ class UsersController extends Controller
     public function store(Request $request)
     {
         //
+        $this->authorize('isAdmin');
         $this->validate($request, [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
@@ -78,7 +80,7 @@ class UsersController extends Controller
         $user = User::findorfail($id);
         $this->validate($request, [
             'name' => ['required', 'string', 'max:255'],
-            'password' => ['sometimes', 'string', 'min:8'],
+            'password' => ['sometimes', 'required','string', 'min:8'],
             'email' => 'required|string|max:30|unique:users,email,' . $user->id,
         ]);
 
@@ -98,6 +100,7 @@ class UsersController extends Controller
     public function destroy($id)
     {
         //
+        $this->authorize('isAdmin');
         $user = User::findorfail($id);
 
         $user->delete();
@@ -105,7 +108,7 @@ class UsersController extends Controller
         return ['message' => 'User Deleted successfully'];
     }
 
-      /**
+    /**
      * Display the specified resource.
      *
      * @param  int  $id
@@ -115,5 +118,44 @@ class UsersController extends Controller
     {
         //
         return auth('api')->user();
+    }
+
+    public function updateprofile(Request $request)
+    {
+        //
+        $user = auth('api')->user();
+
+        $this->validate($request, [
+            'name' => ['required', 'string', 'max:255'],
+            'password' => ['sometimes', 'string', 'min:8'],
+            'email' => 'required|string|unique:users,email,' . $user->id,
+        ]);
+
+        $current = $user->photo;
+        $ext = explode('/', explode(':', substr($request->photo, 0, strpos($request->photo, ";")))[1])[1];
+
+        if ($request->photo != $current) {
+            $name = time() . "-" . uniqid() . "." . $ext;
+
+            \Image::make($request->photo)->save(public_path('img/profile/') . $name);
+
+            $request->merge (['photo'=>$name]);
+
+            $userimage =public_path('img/profile/') . $current;
+
+            if(file_exists($userimage)){
+                unlink($userimage);
+            }
+        }
+
+        if(!empty($request->password)){
+
+            $request->merge(['password'=> Hash::make($request->password)]);
+
+        }
+
+        $user->update($request->all());
+
+        return ["Message" => "Profile update Successful"];
     }
 }

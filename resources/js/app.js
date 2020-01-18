@@ -14,6 +14,9 @@ import moment from "moment";
 import VueProgressBar from "vue-progressbar";
 import VueRouter from "vue-router";
 import swal from "sweetalert2";
+import Gate from "./gate";
+
+Vue.prototype.$gate = new Gate(window.user);
 
 window.Form = Form;
 window.Swal = swal;
@@ -67,7 +70,7 @@ const Toast = Swal.mixin({
 });
 window.Toast = Toast;
 
-window.events =new Vue();
+window.events = new Vue();
 /**
  * The following block of code may be used to automatically register your
  * Vue components. It will recursively scan this directory for the Vue
@@ -80,23 +83,20 @@ window.events =new Vue();
 // files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default))
 
 Vue.component(
-    "example-component",
-    require("./components/ExampleComponent.vue").default
+    "passport-clients",
+    require("./components/passport/Clients.vue").default
 );
+Vue.component("pagination", require("laravel-vue-pagination"));
 Vue.component(
-    'passport-clients',
-    require('./components/passport/Clients.vue').default
+    "passport-authorized-clients",
+    require("./components/passport/AuthorizedClients.vue").default
 );
 
 Vue.component(
-    'passport-authorized-clients',
-    require('./components/passport/AuthorizedClients.vue').default
+    "passport-personal-access-tokens",
+    require("./components/passport/PersonalAccessTokens.vue").default
 );
-
-Vue.component(
-    'passport-personal-access-tokens',
-    require('./components/passport/PersonalAccessTokens.vue').default
-);
+Vue.component("not-found", require("./components/404.vue").default);
 
 Vue.use(VueProgressBar, {
     color: "rgb(149, 97, 226)",

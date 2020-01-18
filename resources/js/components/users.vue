@@ -1,6 +1,6 @@
 <template>
     <div class="container">
-        <div class="row mt-5">
+        <div class="row mt-5" v-if="$gate.isAdmin()">
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
@@ -18,7 +18,7 @@
                         class="card-body table-responsive p-0"
                         style="height: 300px;"
                     >
-                        <table class="table table-head-fixed">
+                        <table class="table">
                             <thead>
                                 <tr>
                                     <th>ID</th>
@@ -30,7 +30,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="user in users" :key="user.id">
+                                <tr v-for="user in users.data" :key="user.id">
                                     <td>{{ user.id }}</td>
                                     <td>{{ user.name }}</td>
                                     <td>{{ user.email }}</td>
@@ -53,9 +53,19 @@
                         </table>
                     </div>
                     <!-- /.card-body -->
+                    <div class="card-footer">
+                        <pagination
+                            :data="users"
+                            @pagination-change-page="getResults"
+                        ></pagination>
+                    </div>
                 </div>
                 <!-- /.card -->
             </div>
+        </div>
+
+        <div v-if="!$gate.isAdmin()">
+            <not-found></not-found>
         </div>
         <!-- Modal -->
         <div
@@ -70,10 +80,18 @@
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 v-show="!editmode" class="modal-title" id="addnewuserLabel">
+                        <h5
+                            v-show="!editmode"
+                            class="modal-title"
+                            id="addnewuserLabel"
+                        >
                             Add New User
                         </h5>
-                        <h5 v-show="editmode" class="modal-title" id="addnewuserLabel">
+                        <h5
+                            v-show="editmode"
+                            class="modal-title"
+                            id="addnewuserLabel"
+                        >
                             Edit User
                         </h5>
                         <button
@@ -191,10 +209,18 @@
                                 >
                                     Close
                                 </button>
-                                <button v-show="!editmode" type="submit" class="btn btn-success">
+                                <button
+                                    v-show="!editmode"
+                                    type="submit"
+                                    class="btn btn-success"
+                                >
                                     Save
                                 </button>
-                                <button v-show="editmode" type="submit" class="btn btn-primary">
+                                <button
+                                    v-show="editmode"
+                                    type="submit"
+                                    class="btn btn-primary"
+                                >
                                     Update
                                 </button>
                             </div>
@@ -213,7 +239,7 @@ export default {
             editmode: false,
             users: {},
             form: new Form({
-                id:"",
+                id: "",
                 name: "",
                 email: "",
                 password: "",
@@ -224,10 +250,15 @@ export default {
         };
     },
     methods: {
+        getResults(page = 1) {
+            axios.get("api/user?page=" + page).then(response => {
+                this.users = response.data;
+            });
+        },
         updateuser() {
             this.$Progress.start();
             this.form
-                .put("api/user/"+this.form.id)
+                .put("api/user/" + this.form.id)
                 .then(
                     events.$emit("usercreated"),
                     $("#addnewuser").modal("hide"),
@@ -236,7 +267,7 @@ export default {
                         title: "User Updated Successfully"
                     })
                 )
-                .catch(()=>{
+                .catch(() => {
                     this.$Progress.fail();
                 });
 
@@ -270,7 +301,9 @@ export default {
             this.$Progress.finish();
         },
         loadusers() {
-            axios.get("api/user").then(({ data }) => (this.users = data.data));
+            if (this.$gate.isAdmin) {
+                axios.get("api/user").then(({ data }) => (this.users = data));
+            }
         },
         deleteuser(id) {
             Swal.fire({

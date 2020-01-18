@@ -6,7 +6,7 @@
 
 <template>
     <div>
-        <div v-if="tokens.length > 0">
+        <div v-if="tokens.length > 0 && $gate.isAdmin() ">
             <div class="card card-default">
                 <div class="card-header">Authorized Applications</div>
 

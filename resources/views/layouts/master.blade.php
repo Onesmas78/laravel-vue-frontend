@@ -62,6 +62,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
         </div>
         <div class="info">
           <a href="#" class="d-block">{{auth::user()->name}}</a>
+          <p class="white">{{auth::user()->type}}</p>
         </div>
       </div>
 
@@ -78,6 +79,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
               </p>
             </router-link>
           </li>
+          @can('isAdmin')
           <li class="nav-item">
             <router-link to="/users" class="nav-link">
               <i class="nav-icon  fas fa-cog"></i>
@@ -86,6 +88,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
               </p>
             </router-link>
           </li>
+          @endcan
           <li class="nav-item">
             <router-link to="/profile" class="nav-link">
               <i class="nav-icon  fas fa-user"></i>
@@ -94,6 +97,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
               </p>
             </router-link>
           </li>
+          @can('isAdmin')
           <li class="nav-item">
             <router-link to="/system" class="nav-link">
               <i class="nav-icon  fas fa-microchip"></i>
@@ -102,6 +106,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
               </p>
             </router-link>
           </li>
+          @endcan
           <li class="nav-item">
             <a href="{{ route('logout') }}"onclick="event.preventDefault(); 
             document.getElementById('logout-form').submit();" class="nav-link">
@@ -150,7 +155,12 @@ scratch. This page gets rid of all links and provides the needed markup only.
 <!-- ./wrapper -->
 
 <!-- REQUIRED SCRIPTS -->
-
+@auth
+  <script>
+    window.user = @json(auth()->user())
+  </script>
+  
+@endauth
 <script src="/js/app.js"></script>
 
 </body>
