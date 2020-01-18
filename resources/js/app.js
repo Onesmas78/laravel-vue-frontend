@@ -41,6 +41,10 @@ const routes = [
     {
         path: "/system",
         component: require("./components/system.vue").default
+    },
+    {
+        path: "*",
+        component: require("./components/404.vue").default
     }
 ];
 
@@ -111,5 +115,18 @@ Vue.use(VueProgressBar, {
 
 const app = new Vue({
     el: "#app",
-    router
+    router,
+    data: {
+        search: ""
+    },
+
+    methods: {
+        searchit: _.debounce(() => {
+            events.$emit("searching");
+        }, 1000),
+
+        printfunction(){
+            window.print();
+        }
+    }
 });

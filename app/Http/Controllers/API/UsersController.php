@@ -80,7 +80,7 @@ class UsersController extends Controller
         $user = User::findorfail($id);
         $this->validate($request, [
             'name' => ['required', 'string', 'max:255'],
-            'password' => ['sometimes', 'required','string', 'min:8'],
+            'password' => ['sometimes', 'required', 'string', 'min:8'],
             'email' => 'required|string|max:30|unique:users,email,' . $user->id,
         ]);
 
@@ -119,6 +119,21 @@ class UsersController extends Controller
         //
         return auth('api')->user();
     }
+    public function search(Request $request)
+    {
+        //
+        if ($search = $request->q) {
+            $users = User::where(function ($query) use ($search) {
+                $query->where('name', 'LIKE', "%$search%")->orWhere('email', 'LIKE', "%$search%");
+            })->paginate(5);
+        } else {
+            $users = User::latest()->paginate(5);
+        }
+
+        return $users;
+
+        // return $request->q;
+    }
 
     public function updateprofile(Request $request)
     {
@@ -139,19 +154,18 @@ class UsersController extends Controller
 
             \Image::make($request->photo)->save(public_path('img/profile/') . $name);
 
-            $request->merge (['photo'=>$name]);
+            $request->merge(['photo' => $name]);
 
-            $userimage =public_path('img/profile/') . $current;
+            $userimage = public_path('img/profile/') . $current;
 
-            if(file_exists($userimage)){
+            if (file_exists($userimage)) {
                 unlink($userimage);
             }
         }
 
-        if(!empty($request->password)){
+        if (!empty($request->password)) {
 
-            $request->merge(['password'=> Hash::make($request->password)]);
-
+            $request->merge(['password' => Hash::make($request->password)]);
         }
 
         $user->update($request->all());

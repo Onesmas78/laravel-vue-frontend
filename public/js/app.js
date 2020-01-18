@@ -3696,6 +3696,14 @@ __webpack_require__.r(__webpack_exports__);
     events.$on("usercreated", function () {
       _this5.loadusers();
     });
+    events.$on("searching", function () {
+      var query = _this5.$parent.search;
+      axios.get("api/finduser?q=" + query).then(function (data) {
+        _this5.users = data.data;
+      })["catch"](function () {
+        return "no results";
+      });
+    });
   }
 });
 
@@ -63846,12 +63854,12 @@ var render = function() {
               staticStyle: { "background-image": "url('./img/cover.jpg')" }
             },
             [
-              _c("h3", { staticClass: "widget-user-username text-right" }, [
+              _c("h3", { staticClass: "widget-user-username text-left" }, [
                 _vm._v(_vm._s(_vm.form.name))
               ]),
               _vm._v(" "),
-              _c("h5", { staticClass: "widget-user-desc text-right" }, [
-                _vm._v("Web Designer")
+              _c("h5", { staticClass: "widget-user-desc text-left" }, [
+                _vm._v(_vm._s(_vm.form.type))
               ])
             ]
           ),
@@ -79933,6 +79941,9 @@ var routes = [{
 }, {
   path: "/system",
   component: __webpack_require__(/*! ./components/system.vue */ "./resources/js/components/system.vue")["default"]
+}, {
+  path: "*",
+  component: __webpack_require__(/*! ./components/404.vue */ "./resources/js/components/404.vue")["default"]
 }];
 Vue.filter("upper", function (text) {
   return text.charAt(0).toUpperCase() + text.slice(1);
@@ -79985,7 +79996,18 @@ Vue.use(vue_progressbar__WEBPACK_IMPORTED_MODULE_2___default.a, {
 
 var app = new Vue({
   el: "#app",
-  router: router
+  router: router,
+  data: {
+    search: ""
+  },
+  methods: {
+    searchit: _.debounce(function () {
+      events.$emit("searching");
+    }, 1000),
+    printfunction: function printfunction() {
+      window.print();
+    }
+  }
 });
 
 /***/ }),

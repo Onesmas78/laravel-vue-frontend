@@ -342,6 +342,17 @@ export default {
         events.$on("usercreated", () => {
             this.loadusers();
         });
+        events.$on("searching", () => {
+            let query = this.$parent.search;
+            axios
+                .get("api/finduser?q=" + query)
+                .then(data => {
+                    this.users = data.data;
+                })
+                .catch(() => {
+                    return "no results";
+                });
+        });
     }
 };
 </script>
