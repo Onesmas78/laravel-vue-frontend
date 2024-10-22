@@ -1,0 +1,50 @@
+name: SonarCloud Analysis
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  sonarcloud:
+    name: SonarCloud Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for better relevancy of analysis
+          
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: xdebug
+          
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+          
+      - name: Run tests with coverage
+        run: |
+          mkdir -p coverage
+          vendor/bin/phpunit --coverage-clover coverage/coverage-report.xml
+        
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=Onesmas78_laravel-vue-frontend
+            -Dsonar.organization=onesmas78
+            -Dsonar.sources=src
+            -Dsonar.tests=tests
+            -Dsonar.php.coverage.reportPaths=coverage/coverage-report.xml
+            -Dsonar.php.tests.reportPath=coverage/test-report.xml
+            -Dsonar.sourceEncoding=UTF-8
+            -Dsonar.exclusions=vendor/**,tests/**
+            -Dsonar.php.file.suffixes=php
